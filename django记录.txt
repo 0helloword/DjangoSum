@@ -1,0 +1,1686 @@
+-pycharm识别sqlite文件
+	-导入django文件后，选择新建的db.sqlite3文件
+	-右键新增data source，选择对应驱动打开并测试连接
+	-第一次需要安装sqlite驱动
+	
+-标记模板文件
+	-新建templates文件夹后，右键mark directory as-template forlder
+	-文件夹颜色变为紫色，会自动被pycharm识别为模板文件夹
+	
+-setting文件更改
+	-访问host
+		-setting中allowhost设置为*，即所有人都可以访问 
+		-ALLOWED_HOSTS = ['*']
+	-LANGUAGE_CODE = 'zh-hans'
+	-TIME_ZONE = 'Asia/Shanghai'
+	-USE_TZ = False
+	
+-创建项目
+	-django-admin startproject myblog
+
+-新增应用文件
+	-python manage.py startapp app
+	-第一步在项目的setting.py文件的参数INSTALLED_APPS中添加应用名称，如‘App’
+	-注册的目的是在写了model文件后，迁移数据库时需要告诉系统增加了一个应用，否则系统识别不到，执行生成迁移文件时会提示No changes detected
+	-所以如果项目压根没有model,则不需要将应用注册到setting中的INSTALLED_APPS，程序也可以照样使用
+
+-启动服务
+	-python manage.py runserver
+
+-创建新网页的步骤
+	-先添加路由urls
+	-然后去views中添加对应的路由函数
+	-如果返回的是html页面，则用render进行渲染
+	
+-views中添加的函数格式：
+	-入参为request 
+	-1.返回HttpResponse('test')   
+	-2.返回 render(response,'index.html')
+	
+-在pycharm中修改py代码
+	-无需手动重启服务，直接刷新页面即可
+
+-创建模板文件两种方法：                                                                                                                                                                                                  
+	-在应用根目录创建templates,标记为模板文件，应用可直接访问模板中的html文件                                                                                                       
+	-在项目根目录创建templates文件,标记为模板文件，同时在setting.py文件的templates参数中设置其相对路径   
+	-'DIRS': [os.path.join(BASE_DIR,'templates')]
+	-正式项目一般采用第二种方式，模板复用，继承
+
+-数据显示在模板钟
+	-先挖坑 {{var}}
+	-再填坑	
+		-渲染模板时传递上下文context
+		-context是一个字典
+		-key就是var,value为要传入的值
+		-'students':students
+
+-路由优化配置：                                                                                                                                                                                                                     
+	-直接使用项目下的urls路由文件                                                                                                                                                                                            
+	-如果项目比较复杂,可以拆分路由 ;每个应用创建自己的子路由文件urls,再将子路由文件添加到主urls中，include('应用名称/urls');
+	-子路由访问规则：主路由规则+子路由规则
+
+-迁移数据库表	
+	-创建了数据库模板文件
+	-生成迁移文件：python manage.py makemigrations 
+	-执行迁移文件，将迁移文件映射到数据库：python manage.py migrate
+	-如在执行生成迁移文件时一直提示No changes detected，有可能是忘记将该应用添加到注册app中，导致找不到该项目下的数据库模板
+	 
+
+-数据库操作
+	-在urls中添加路由add/update/del/get 
+	-在views中实现对应方法
+	-存储
+		-save()
+	-增加
+		-先创建一个对象
+		-再修改对应的属性
+			-三种方式
+			-s_name='jack'
+			-Student.objects.create(s_name='jack')
+			-Student(s_name='jack')
+		-保存save()
+	-查询
+		-查所有 objects.all()
+		-查单个 objects.get(pk=xx) pk为主键
+		-返回context(字典类型)属性渲染html页面
+		-html模板中使用{{}}做为占位符
+	-更新
+		-基于查询
+		-修改属性，保存save()
+	-删除
+		-基于查询
+		-调用 delete()
+		
+
+	
+	
+-修改为连接mysql
+	-修改setting数据库为mysql
+		-'ENGINE':'django.db.backends.mysql',
+        -'NAME':'gp1hellodjango',
+        -'USER':'root',
+        -'PASSWORD':'admin',
+        -'PORT':3306,
+        -'HOST':'127.0.0.1',
+	-创建库  create database gp1hellodjango charset=utf8;
+	-pycharm连接mysql
+		-第一次需要安装驱动
+	-执行迁移文件
+		-python manage.py migrate
+	-安装MySQL驱动
+		-共3种驱动
+			-mysqlclient
+				-python2,3都可以直接使用
+				-致命缺点：对mysql安装有要求，必须指定位置存在配置文件
+			-python-mysql
+				-python2支持很好
+				-python3不支持
+			-pymysql
+				-python2,3都支持
+				-还可以伪装成前面的库
+		-安装
+			-pip install pymysql
+			-安装比较慢时改为国内的源 pip install pymysql -i https://pypi.douban.com/simple
+
+	-将pymysql伪装成mysqldb
+		-在项目的init文件中添加
+		-import pymysql
+		-pymysql.install_as_MySQLdb()
+
+-表关系
+	-创建表 create database GP1DjangoModel chartset=utf8;
+	-外键
+		-一个表中的属性是另一张表中的主键，主键不可重复，外键可重复
+		-使用外键可以实现1对多，或多对1
+	-1:1
+		-格式：对象.模型类小写
+		-示例：grade.student
+	-1:M
+		-格式：对象.模型类小写_set
+		-示例：grade.student_set.all()
+	-M:M
+
+-数据库中数据类型
+	-字符串
+	-数字
+	-日期时间
+	
+-模块过滤
+	-返回查询queryset结果集
+		-filter()
+		-exclude()
+		-连续使用
+			-链式调用 person.objects.filter().filter().exclude().exclude()
+		-排序
+			-正序 objects.all().order by('id')
+			-倒序 objects.all().order by('-id')
+		-values() 
+			-People.values()
+			-一条数据就是一个字典，返回一个列表
+	-返回单个数据
+		-get()
+			-查询条件没有匹配的对象，会抛异常，DoesNotExist
+			-查询条件对应多个对象，会抛异常，MultipleObjectsReturned
+			-需配合try except 使用
+		-frist()
+		-last()
+			-默认情况下可以正常从QuerySet中获取
+			-隐藏bug:可能会出现first和last获取到的是相同的对象
+		-count() 返回当前查询集中的对象个数
+		-exists() 判断结果集中是否有数据，有返回True,没有反之
+	-限制查询集
+		-[0:5]
+		-与python中的切片不太一样,不是将查询的总数据再切片
+		-QuerySet[5:15]获取第5-15条数据
+			-相当于sql中的limit和offset
+			-下标不能为负数
+	-缓存集
+		-filter,exclude,all这些都不会真正查数据库，只有在迭代结果集，获取单个对象属性时，才会去查询数据库
+	-django中的查询条件有时区问题
+		-关闭django中自定义的时区  setting中的USE_TZ=False
+		-在数据库中创建对应的时区表
+	-跨关系查询
+		-即数据库中的join关系
+		-grades=Grade.objects.filter(student__s_name__contains='summer')
+		-获取名字为summer的学生在哪个班级
+	-聚合函数
+		-使用aggregate()函数返回聚合函数的值
+		-Avg:平均值 Count:数量 Max:最大 Min:最小 Sum:求和
+		-customers=Customer.objects.aggregate(Max("c_cost"))  返回一个字典
+	-F对象
+		-可以获取属性值
+		-可以实现一个模型的不同属性的运算操作
+		-还可以支持算术运算
+		-适合自查询（同一个模型）
+		-companys=Company.objects.filter(c_gril_num__gt=F('c_boy_num'))+10
+		-查询女生人数比男生人数大10的公司
+	-Q对象
+		-可以对查询条件进行封装
+		-封装之后可以支持逻辑运算 & | ~(非)
+		-companys=Company.objects.filter(Q(c_gril_num__gt=10)&Q(c_boy_num__lt=30))
+		-查询女生个数大于10男生个数小于30的公司
+	
+	
+-方法
+	-对象方法
+		-可以调用对象属性，也可以调用类的属性
+	-类方法
+		-不能调用对象属性，只能调用类属性
+	-静态方法
+		-啥都不能调用，不能获取对象属性，也不能获取类属性
+		-只是寄生在我们的类上
+
+模型成员
+	-显性属性
+		-开发者手动书写的属性
+	-隐性属性
+		-开发者没有写，ORM自动生成的
+		-如果你把隐形属性手动声明了，系统就不会为你产生隐形属性了
+		-例：将查询属性增加is_delete的筛选
+
+-html模板	
+	-empty
+	-当列表为空或不存在时，执行empty之后的语句
+	-语法：
+		{% for student in students %}
+			<li>{{ student.s_name }}</li>
+			{%  empty %}
+			<h3>查找不到符合条件的学生</h3>
+		{% endfor %}
+	-forloop
+		-{{ forloop.counter }}表示当前是第几次循环，从1开始
+		-{{ forloop.counter0 }}表示当前是第几次循环，从0开始
+		-{{ forloop.revcounter }}表示当前是第几次循环，倒着排序，到1结束
+		-{{ forloop.first }}是否是第一个 布尔值
+		-{{ forloop.last }}是否是最后一个 布尔值
+	-注释 不会暴露在外面，右键审查元素也看不到
+		-单行{# 被注释的内容 #}
+		-多行 {% comment %} 内容 {% endcomment %}
+	-ifequal
+		-如果相等就执行
+		-语法：
+			{% ifequal forloop.counter 5 %}
+			<li style="color: coral">{{ student.s_name }}</li>
+			{% else %}
+			<li style="color: black">{{ student.s_name }}</li>
+			{% endifequal %}
+	-ifnotequal
+		-如果不相等就执行
+	-过滤器 {{val|过滤器}}
+		-语法：
+			 {% if forloop.counter|divisibleby:3 %}
+	-safe
+		-渲染html
+			-{{value|safe}} 要放在需要改变的文本下方
+			-{% autoescape off %} off为渲染 on不渲染
+	-结构标签
+		-block
+			-块
+			-规划布局（挖坑）
+			-首次出现，代表规划
+			-第二次出现，代表填充之前的规划
+			-第三次出现，代表填充之前的规划，默认动作是覆盖
+				-如果不想覆盖，可以添加{{block.super}}
+				-这样就实现了增量式操作
+		-extends
+			-继承
+			-可以获取父模板中的所有结构
+		-block+extends
+			-化整为零
+		-include
+			-包含
+			-可以将页面做为一部分，嵌入到其他页面中
+		-include+block
+			-由零聚一
+		-三个标签页可以混合使用
+		-能用block+extends搞定的，就尽量不要使用include
+			-加载速度有影响
+		-如果继承一个父模板，子模版自己直接重写页面结构不生效，只能在既有的坑中写
+
+
+-静态资源（css）
+	-动静分离
+	-创建静态文件夹
+	-注册资源
+		-setting中设置STATICFILES_DIRS=[os.path.join(BASE_DIR,'static')]
+	-在模板中挖坑
+		-在header中添加 {% block ext_css %}    {% endblock %}
+	-子模版中填坑
+		-先加载静态资源{% load static %}
+		-再填坑，使用{% static 'XXX' %}xxx相对路径
+		-语法：
+			{% block ext_css %}
+			<link rel="stylesheet" href="{% static 'css/mine.css' %}" >
+			{% endblock %}
+	-坑点
+		-仅在debug模式可以使用
+		-以后需要自己单独处理
+
+-视图
+	-视图响应过程
+		-浏览器输入》django获取信息并去掉ip和端口，剩下的路径》urls路由匹配》视图响应》回馈到浏览器
+
+-urls
+	-路由器
+		-按照列表的书写顺序进行匹配
+		-从上到下匹配，没有最优匹配的概念
+	-路由规则编写
+		-通常直接指定以^开头
+		-在结尾处直接添加反斜线
+	-路由路径中的参数使用（）获取
+		-一个圆括号对应视图函数中的一个参数
+		-参数
+			-路径参数
+				-位置参数
+					-按照书写顺序进行匹配
+				-关键字参数
+					-按照参数名称匹配，和顺序无关
+			-参数个数必须和视图函数中的参数个数一致（除默认的request以外）
+	-格式
+		-url(r'^market/', views.market, name='market')  不带参数
+		-url(r'^marketwithparams/(?P<typeid>\d+)/', views.marketwithparams, name='marketwithparams') 带参数
+	-反向解析
+		-根路由中添加namespace: url(r'task/',include('task.urls',namespace='task')
+		-根据根路由中注册的namespace和在子路由中注册的name,这两个参数来动态获取路径
+		-模板中使用 {% url 'namespace:name' %}
+		-如果带有位置参数 {% url 'namespace:name' value1 value2 %}
+		-如果带有关键字参数 {% url 'namespace:name' key1=value1 key2=value2 %}
+
+
+-locals
+	-内置函数
+	-将局部变量，使用字典的方式进行打包
+	-key是变量名，value是变量中的值
+	-可以省去return中的context
+
+-错误页面
+	-在模板中重写对应错误状态码页面
+	-关闭debug
+	-实现原则
+		-就近原则
+
+-双R		
+	-request
+		-内置属性
+			-method
+			-path
+			-GET
+				-类字典结构
+				-一个key允许对应多个值
+				-get获取单个值
+					-request.GET.get('hobby')
+				-getlist 获取多个值
+					-request.GET.getlist('hobby')
+			-POST
+			-MATA
+				-各种客户端元信息
+				-REMOTE_ADDR远程访问IP
+	-response
+		-内置属性
+			-content 返回的内容
+			-charset 编码格式
+			-status.code 响应状态码
+			-content-type MIME类型
+				-MIME
+				-作用：制定传输数据使用哪种形式打开
+				-格式：大类型/小类型
+				-image/png
+				-image/jpg
+		-方法
+			-init 初始化内容
+			-write(XXX) 直接写出文本
+			-flush() 冲刷缓冲区
+			-set_cookie   设置cookie
+			-delete_cookie 删除cookie
+			-HttpResponseRedirect 响应重定向
+				-return HttpResponseRedirect('/app/hello')
+				-return HttpResponseRedirect(reverse('namespace:name')
+				-位置参数 return HttpResponseRedirect(reverse('namespace:name',args=(value1,value2...))
+				-关键字参数 return HttpResponseRedirect(reverse('namespace:name',kwargs=(key1:value1,key2:value2...))
+			-JsonResponse 返回json数据的请求，通常用在异步请求上
+				-return JsonResponse(data=data)
+			
+-爬虫
+	-模拟人去请求数据
+	-提取数据
+	-存储数据
+-核心内容
+	-数据爬取
+	-数据提取
+	-数据存储
+	-提升效率
+		-进程
+		-线程
+		-协程
+
+Json
+	-jsonObject
+		-{}
+		-key-value
+	-jsonArray
+		-{}
+		-列表中可以是普通数据类型，也可以是jsonobject
+	-jsonObject和jsonArray可以嵌套
+	-给移动端的json
+	-给Ajax
+	
+-会话技术
+	-出现场景
+		-服务器如何识别客户端
+		-http在web开发中基本都是短连接
+	-请求生命周期
+		-从request开始
+		-到response结束
+	-种类
+		-cookie
+			-客户端会话技术
+				-数据存储在客户端
+			-键值对存储
+			-支持过期时间
+			-默认cookie会自动携带，本网站所有cookie
+			-cookie不能跨域名，跨网站
+			-通过Httpresponse
+			-cookie默认不支持中文
+			-写入cookie
+				-response.set_cookie('name','summer')
+			-获取cookie
+				-response.COOKIES.get('name')
+			-可以加盐
+				-加密
+					-response.set_signed_cookie("username",username,'summer')
+				-获取的时候需要解密
+					-request.get_signed_cookie("username",salt='summer')
+		-session
+			-服务端会话技术
+			-数据存储在服务器中
+			-默认session存储在内存中
+			-django默认会把session持久化到数据库中
+			-jdango中session的默认过期时间是14天
+			-主键是字符串
+			-数据使用了数据安全，以=结尾一般是base64加密
+				-使用的base64
+				-在前部添加了一个混淆串
+			-session依赖于cookie
+			-写入session
+				-request.session["username"]=uname
+			-获取session
+				-request.session.get('username')
+		-token
+			-服务端会话技术
+			-自定义的session
+			-如果用在web页面开发，使用起来与session基本一致
+			-如果使用在移动端或客户端开发中，通常以json形式传输，需要移动端自己存储token,需要获取token关联数据的时候，主动传递token
+			-写入token到数据库
+				-student.s_token=token
+				-response.set_cookie("token",token) 设置到cookie
+			-获取token
+				-request.COOKIES.get("token")
+	-cookie与session，token对比
+		-cookie使用起来更简洁，服务器压力更小，数据不是很安全
+		-session服务器要维护session,相对安全
+		-token拥有session的所有优点，自己维护略微麻烦，支持更多的终端
+-csrf
+	-放跨站攻击
+	-防止恶意注册，确保客户端时我们自己的客户端
+	-使用了cookie中的csrftoken进行验证，传输
+	-服务器发送给客户端，客户端将cookie获取过来，还要进行编码转换（数据安全）
+	-如何实现：{% csrf_token %}
+		-在我们存在csrf_token标签的页面中，响应会自动设置一个cookie,csrftoken
+		-当我们提交的时候，会自动验证csrftoken
+		-验证通过，正常执行以后流程，验证不通过，直接403
+
+-算法
+	-编码解码
+		-base64
+		-urlencode
+	摘要算法，指纹算法，杂凑算法
+		-MD5,SHA
+			-MD5默认时128位的二进制
+			-32位的十六进制
+			-32位的Unicode
+		-单向不可逆的
+		-不管输入多长，输出都是固定长度
+		-只要输入有任意的变更，输出都会发生巨大的变化
+	-加密
+		-对称加密
+			-一把钥匙
+			-DES,AES
+			-加密解密效率高
+			-钥匙一旦丢失，所有数据就全玩完了
+		-非对称加密
+			-两把钥匙，成对的
+			-公钥和私钥
+			-RSA,PGP
+			-安全性最高
+			-算法复杂，加密解密需要时间长
+			-支付宝，微信都是RSA
+-编码			
+	-ASCII
+	-Unicode
+	-
+
+作业		
+做一个班级学生列表
+班级列表
+班级列表可点击
+点击的时候显示班级所有学生
+要求路径全都使用反向解析
+在学生列表页面添加点击事件
+点击学生可以进入学生详情
+在详情中存在删除按钮，点击删除（逻辑或物理删除都可以）
+在学生列表最后面添加输入窗口，可以动态添加学生
+
+实现cookie存储中文
+base64
+
+
+
+-快捷键
+	-编写html模板文件时，可使用快捷键 ul>li*5 表示新增5个列表
+	-ctrl+p 参数提示
+	-alt+enter 实现自动导入库
+	-control+d 复制一行，插入到下面
+	-ctrl+alt+l 代码格式化
+	-ctrl+n  全局搜索类
+	-双击shift  搜索
+
+-迁移
+	-分两步实现
+		-生成迁移文件
+		-执行迁移文件
+	-迁移文件的生成
+		-根据models文件生成对应的迁移文件
+		-根据models和已有迁移文件差别，生成新的迁移文件
+	-执行迁移文件
+		-先去迁移记录中查找，哪些文件未迁移过
+			-app_label+迁移文件名字
+		-执行未迁移的文件
+		-执行完毕记录执行过的迁移文件
+	-重新迁移
+		-删除迁移文件
+		-删除迁移文件生成的表
+		-删除迁移记录
+	
+-模型关系
+	-1：1   person-idcard
+		-应用场景
+			-用于复杂表的拆分
+			-扩展新功能
+		-Django中OneToOneField
+			-使用的时候，关系声明还是有细微的差别的
+		-实现
+			-使用外键实现的
+			-对外键添加了唯一约束
+		-数据删除
+			-级联表
+				-主表    person
+				-从表    idcard
+				-谁声明关系谁就是从表  OneToOneField
+				-在开发中如何确认主从
+					-当系统遭遇不可避免毁灭时，是能保留一张表，这个表就是你的主表
+			-默认特性(CASECADE)
+				-从表数据删除，主表不受影响
+				-主表数据删除，从表数据直接删除
+			-PROTECT受保护
+				-on_delete=models.PROTECT
+				-开发中为了防止误操作，通常设置为此模式
+				-主表中如果存在级联数据，删除动作受保护，不能成功
+				-主表中不存在级联数据，可以删除成功
+			-SET（可以删除，但是将级联关系置为NULL或default）
+				-SET_NULL  on_delete=models.SET_NULL
+					-允许为NULL
+				-SET_DEFAULT
+					-存在默认值
+				-SET()
+					-指定值
+			-级联数据获取
+				-主获取从 隐性属性 默认就是从表模型的名字小写  idcard=person.idcard
+				-从获取主 显性属性 就是属性的名字  person=idcard.id_person
+	-1：M	grade-student
+		-ForeignKey
+		-数据删除
+			-级联表
+				-主表	grade
+				-从表	student
+				-谁使用了ForeignKey谁就是从表
+			-默认特性
+				-从表数据删除，主表不受影响
+				-主表数据删除，从表数据直接删除
+			-PROTECT受保护
+				-on_delete=models.PROTECT
+				-开发中为了防止误操作，通常设置为此模式
+				-主表中如果存在级联数据，删除动作受保护，不能成功
+				-主表中不存在级联数据，可以删除成功
+			-SET（可以删除，但是将级联关系置为NULL或default）
+				-SET_NULL  on_delete=models.SET_NULL
+					-允许为NULL
+				-SET_DEFAULT
+					-存在默认值
+				-SET()  on_delete=models.SET('1')
+					-指定值
+		-主从获取
+			-主获取从 隐性属性 级联模型_set
+				-student_set Manager的子类
+					-all
+					-filter  students = Student.objects.filter(s_grade=grade)
+					-exclude
+					-Manager上能使用的函数都能使用
+		-从获取主
+			-显性属性  grade=student.s_grade
+	-M:N  goods-customer
+		-最复杂
+		-开发中很少直接使用多对多属性，而是自己维护多对多的关系
+		-级联表
+				-主表    goods
+				-从表    customer
+				-谁声明关系谁就是从表  OneToOneField
+		-产生表的时候会产生单独的关系表
+			-关系表中存储关联表的主键，通过多个外键实现的
+			-多个外键值不能同时相等
+		-级联数据获取
+			-从获取主
+				-使用属性，属性是一个Manager子类 customerlist=goods.g_customer.all()
+			-主获取从
+				-隐性属性，也是Manager子类，操作和从操作主完全一样 goodslist=customer.goods_set.all()
+		-级联数据
+			-add
+			-remove
+			-clear
+			-set		
+		-ManyRelatedManager
+			-函数中定义的类
+			-并且父类是一个参数
+			-动态创建
+
+-模型继承
+	-django中模型支持继承
+	-默认继承是会将通用字段放到父表中，特定字段放在自己的表中，中间使用外键连接
+		-关系型数据库关系越复杂，效率越低，查询越慢
+		-父类表中也会存储过多的数据
+	-使用元信息类解决这个问题
+		-使模型抽象化
+		-抽象的模型就不会在数据库中产生映射了
+		-子模型映射出来的表直接包含父模型的字段
+		-meta
+			-class Meta:
+				abstract=True
+
+-在企业开发中
+	-model to sql
+	-sql to model
+		-python manage.py inspectdb >App/models.py
+			-直接根据表生成模型
+			-元信息中包含一个属性manage=False
+	-如果自己的某个模型不行被迁移系统管理，也可以使用manage=False管理
+
+-静态资源文件上传
+	-setting中定义MEDIA_ROOT媒体根目录
+		-MEDIA_ROOT=os.path.join(BASE_DIR,'static/upload')
+	-model定义
+		-icon=models.ImageField(upload_to='icons')
+	-html上传文件
+		-<form method="post" enctype="multipart/form-data">  分包传输
+		-<input type="file" name="icon">
+	-保存文件
+		-request.FILES.get("icon")
+	-查询图片
+		-user.u_icon.url
+		-'icon_url':'/static/upload/'+user.u_icon.url
+
+-缓存
+	-提升服务器响应速度
+	-将执行过的操作数据存储下来，在一定时间内，再次获取数据的时候，直接从缓存中获取
+	-比较理想的方案，缓存使用内存级缓存
+	-django内置缓存
+		-使用数据库做缓存
+			-创建缓存表
+				-python manage.py createcachetable [table_name]
+			-注册缓存
+				-setting中写CACHES
+				-CACHES={
+					'default':{
+					'BACKEND':'django.core.cache.backends.db.DatabaseCache',
+					'LOCATION':'my_cache_table',
+					'TIMEOUT':60*5,
+					}
+				}
+			-缓存使用
+				-在视图中使用装饰器@cache_page(30)  缓存时间为30s
+		-使用redis做缓存
+			-安装django-redis 
+				-pip install django-redis
+			-安装django-redis-cache
+				-pip install django-redis-cache
+			-注册缓存
+				-setting中写CACHES
+				-CACHES={
+					'default':{
+					'BACKEND':'django_redis.cache.RedisCache',
+					'LOCATION':"redis://127.0.0.1:6379/1",
+					"OPTIONS":{
+						"CLIENT_CLASS":"django_redis.client.DefaultClient",
+						}
+					}
+				}
+			-启动redis
+				-redis-server.exe redis.windows.conf
+				(D:\program files\Redis>redis-server.exe redis.windows.conf)
+		-多缓存
+			-设置缓存使用哪种方式
+				-cache=caches['redis_bankend']
+			-获取缓存
+				-cache.get('joker')
+			-设置缓存
+				-cache导包：from django.core.cache import cache
+				-cache.set('joker',response.content,timeout=10)
+
+
+-AOP中间件
+	-作用
+		-从属于面向切面编程
+		-在不修改源代码的情况下，动态添加一些业务逻辑处理
+		-中间件的典型实现-装饰器，中间件就是使用类装饰实现的
+	-自定义中间件流程
+		-在工程目录下创建middleware目录
+		-在目录中创建一个python文件
+		-python文件中创建一个类,继承MiddlewareMixin
+		-在setting中注册中间件
+	-实现统计功能
+		-统计ip
+		-统计浏览器
+	-实现权重控制
+		-黑名单
+		-白名单
+	-实现反爬
+		-反爬虫
+			-十秒之内只能搜索一次
+		-实现频率控制
+	-界面友好化
+		-异常时reverse到一个特定的页面
+	-应用交互友好化
+	-@csrf_exempt
+		-可豁免进行csrf认证
+		
+-中间件
+	-调用顺序
+		-中间件注册的时候是一个列表
+		-如果没有在切点处直接进行返回，中间件会依次执行
+		-如果在某个中间件中直接进行了返回，后续中间件就不再执行了
+	-切点
+		-process_request
+		-process_view
+		-process_template_response
+		-process_response
+		-process_exeption
+	-切面
+		-切点处切开可以获得的数据
+
+-跨域处理
+	-ip和端口不一致，只要有一个不一样就是跨域
+	-跨域的行为校验是浏览器行为
+	-实现跨域
+		-服务端添加属性 允许所有域名访问
+		-在客户端伪装
+	
+-分页器
+	-目的
+		-提升用户体验，减少服务器的负担而开发的
+	-封装实现
+		-Paginator
+			-需要使用数据源和每一页数据量来进行构建
+			-可以获取某一页
+			-可以获取所有页码
+			-可以获取有多少数据，多少页
+		-Page
+			-具体一页的一个载体
+			-可以获取当前是第几页
+			-可以获取对象列表
+			-可以获取兄弟信息
+				-是否有上一页
+				-是否有下一页
+				-上一页页码
+				-下一页页码
+				-是否有其他页
+	-paginator
+		-paginator=Paginator(students,perpage)
+		-page_object=paginator.page(page)
+	-分页美化
+		-bootstrap cdn 静态资源网络加速
+			-bootstrap.css
+			-bootstrap.js
+			-bootstrap.jquery
+			-<link href="https://cdn.bootcss.com/twitter-bootstrap/3.3.7/css/bootstrap.css" rel="stylesheet">
+			<script type='text/javascript' src="https://cdn.bootcss.com/jquery/1.11.1/jquery.js"></script>
+			<script type='text/javascript' src="https://cdn.bootcss.com/twitter-bootstrap/3.3.7/js/bootstrap.js"></script>
+		-bootstrap组件分页器
+	
+-验证码
+	-防止恶意用户
+	-pillow
+		-Image 画布
+			-尺寸
+			-颜色
+			-模式 RGB
+		-ImageDraw 画笔
+			-属于哪一个画布
+			-画完的东西在哪
+			-封装绘制API
+				-文字
+				-点
+				-线
+		-ImageFont 字体
+	-需要将画布转化为二进制流，并且添加格式限定
+	-内存流
+		-BytesIO
+		-将图片存到内存流中
+		-从流中获取到数据值
+	-通过Httpresponse返回图片内容
+		-content_type
+		-MIME   image/png
+	-验证码验证
+		-客户端验证
+			-不太安全
+		-服务端验证
+			-在验证码生成时存储验证码
+			-提交时去验证验证码的有效性
+	-验证码刷新
+		-浏览器缓存策略，以url为标识，url不变，使用缓存
+		-解决方案
+			-每次给你不同的地址
+			-对地址进行一个参数拼接，每次传递不同的参数
+
+-富文本
+	-安装django插件
+		-pip install django-tinymce
+	-setting中添加tinymce应用
+	-添加默认配置
+		-TINYMCE_DEFAULT_CONFIG={
+			"theme":"advanced",
+			"width":800,
+			"height":600,
+			}
+	-在head中添加script
+		-<script src='/static/tiny_mce/tiny_mce.js'></script>
+		 <script type="text/javascript">
+         tinyMCE.init({
+            "mode":"textareas",
+            "theme":"advanced",
+            "width":800,
+            "height":600
+         })
+         </script>
+
+
+-前端基础架构
+	-搭建静态模板页面
+		-导入通用资源
+			-base模板
+				-每个模块都要创建自己的base
+			-reset.css
+	-前端适配
+		-推荐百分比不推荐固定尺寸
+		-适配单位
+			-px
+			-em
+				-默认相对于父级元素
+				-默认大小1em=16px
+			-rem
+				-相对单位
+				-相对于根基元素
+				-默认大小1rem=16px
+		-弹性盒模型
+		-响应式布局
+	-项目中
+		-屏幕宽度的十分之一做为rem的基础单位
+		
+-数据展示
+	-先建立数据
+		-先建表
+		-model to sql
+	-插入数据
+	-数据查询
+	
+
+-程序调试
+	-打印日志
+		-print
+		-log
+			-logging
+		-debug
+			-断点调试
+			-解决稳定复现bug的好方案
+		-统计工具
+		-DjangoDebugToolbar
+			-django调试工具条
+			-拥有极强的调试功能
+			-提供了各种信息的获取
+			-安装：pip install django-debug-toolbar
+			-setting:
+				-INSTALLED_APPS = [
+					'django.contrib.staticfiles',
+					'debug_toolbar',
+					]
+				-STATIC_URL = '/static/'
+				-MIDDLEWARE = ['debug_toolbar.middleware.DebugToolbarMiddleware',]
+				-INTERNAL_IPS=('127.0.0.1','localhost')#限制哪些ip可以看到我的调试
+			-urls:
+				-if settings.DEBUG:
+					import debug_toolbar
+					urlpatterns=[
+						url(r'^__debug__/',include(debug_toolbar.urls)),
+					]+urlpatterns
+
+-高级密码安全工具
+	-不再使用单一的算法实现
+		-至少使用两种以上的算法
+		-算法中输入时间散列
+	-将输入数据进行哈希处理
+	-哈希处理后拼接时间戳
+		-中间使用特定符号拼接
+	-将拼好的数据进行编码
+	-验证策略
+		-将输入进行相同的哈希策略
+		-将数据库中的密码进行解码处理
+		-去除时间散列的混淆
+		-比较哈希码
+
+		
+-用户激活认证
+	-途径
+		-邮件
+		-短信
+		-人工
+	-邮件
+		-发邮件
+			-收件人地址
+			-发件人信息
+				-用户名
+				-密码
+				-服务器
+					-邮件服务器
+					-端口
+				-内容
+		-点击邮件中的链接
+			-链接中存在用户的唯一标识
+				-http://xxxx/activate/?u_token=yyyy
+				-u_token缓冲中做为key,value>user_id
+				-u_token >uuid
+			-标识存在过期时间
+			-标识存在使用次数限制
+	-使用django自带的发邮件方法
+		-from django.core.mail import send_mail
+	-配置参数
+		-EMAIL_HOST = 'smtp.163.com'
+		EMAIL_PORT = 25
+		EMAIL_HOST_USER = '532720298@163.com'
+		EMAIL_HOST_PASSWORD = 'IXTOPIIYEJLQGNHS'
+		SERVER_HOST = '127.0.0.1'
+		SERVER_PORT = 8000
+	
+-错误信息
+	-先将错误信息存储下来
+	-在错误显示页面获取错误信息
+		-保证错误信息只能出现1次
+		-获取到信息后，直接将信息删除
+		
+-购物车
+	-多对多的关系
+		-用户
+		-商品
+	-订单
+		-订单和已购买商品是一对多的关系
+		-表关系
+			-订单表
+				-属于哪个用户
+			-订单商品表
+				-购物车里
+			-地址
+				-每个订单对应一个地址
+				-一个地址可以对应多个订单
+				-订单会级联收货地址表
+			-优惠券
+	-添加购物车
+		-需要用户
+			-未登录，跳转登陆
+		-需要商品
+			-传递商品唯一标识
+		-添加的合法性
+			-此数据不存在，创建购物车数据
+			-此数据存在，直接数量加一
+		
+-小技能
+	-js获取jquery对象属性
+		-attr
+			-可以获取任意属性
+		-prop
+			-只能获取内置属性，如id,name
+			
+-项目中多块逻辑拥有相同操作
+	-封装一个函数
+	-装饰器
+	-中间件
+	
+-浏览器行为
+	-重定向
+	-跨域
+	
+-购物车全选
+	-默认状态
+		-全选按钮选中
+			-内部所有商品都是选中的
+		-全选按钮未选中
+			-内部商品只要存在未选中的，全选应该是未选中
+	-点击全选
+		-原状态是选中
+			-全选和所有商品都变成未选中
+		-原状态时未选中
+			-全选和所有商品都变成选中
+	-点击单个商品
+		-商品由选中变成未选中
+			-全选一定变成未选中
+		-商品由未选中边选中
+			-可能变成选中
+
+-支付
+	-官方文档
+	-常见的支付
+		-支付宝
+			-企业资质
+			-营业执照
+		-微信
+			-要求同支付宝
+			-要认证，一次200，一年收一次
+		-银联
+		-百度钱包
+		-京东钱包
+-支付宝支付
+	-支付宝开发平台
+	-蚂蚁金服开发平台
+	-配置步骤
+		-github上搜索 python-alipay-sdk	（https://github.com/fzlee/alipay/blob/master/README.zh-hans.md#alipay.trade.page.pay）	
+		-使用沙箱环境（https://openhome.alipay.com/platform/appDaily.htm）
+			
+-部署
+	-django中自带开发者服务器
+		-runserver
+			-路由器处理功能，动态资源处理
+			-如果是debug,静态资源处理功能
+		-功能健壮，性能低，仅适用于开发
+	-部署不会使用单一服务器
+		-Apache
+		-Nginx
+			-HTTP服务器
+				-处理静态资源
+			-反向代理
+				-uWSGI HTTP服务器
+				-gunicorn HTTP服务器
+			-邮件服务器
+			-流媒体服务器
+			-安装
+				-包管理工具安装（推荐）
+					-ubuntu
+						-添加软件认证的签名密钥
+						-向源中添加nginx
+						-更新源
+						-安装nginx
+				-源码构建安装
+			-默认nginx会直接启动
+				-本机通过访问127.0.0.1就可以看到
+				-默认配置/etc/nginx/xxx
+				-内置的一些模块也在此
+			-控制nginx
+				-尽量使用nginx指令控制
+					-ngnix -s signal
+						-quit 优雅退出
+						-stop 快速退出
+						-reload 重新加载配置文件
+					-nginx  使用默认配置文件进行启动
+					-nginx -c configpath 使用指定配置文件进行启动
+					-nginx -t -c configpath 测试指定配置文件，只检测语法
+			-配置文件
+				-nginx的核心
+				-格式
+					-类似JSON
+					-分为指令和块指令
+						-指令就是key value
+						-块指令 key{}
+					-main
+					-events
+						-工作模式
+						-工作进程处理的最大连接数
+					-http
+						-service
+							-location
+								-路由匹配
+						-upstream
+			-配置过程
+				-使用nginx处理静态资源
+				-单独使用uwsgi处理动态资源
+					-安装使用uwsgi
+					-key=value
+					-修改工程位置和wsgi位置即可
+				-对接ngnix
+					-只需将配置中的http模式修改为SOCKET模式
+					
+
+		
+-部署云服务器
+	-从0开始做起
+	-安装云服务器系统
+		-Ubuntu 16.04
+	-安装一套开发环境
+		-python
+			-2.x
+			-3.x
+		-pip
+			-注意版本兼容
+		-虚拟环境virtualenv
+			-版本不兼容
+			-workon_home
+			-source xxx
+		-mysql	
+			-apt直接安装
+		-redis
+			-源码安装
+			-make &make test 测试是否正确安装
+			-utils/install_server.sh
+		-nginx
+			-添加钥匙
+			-添加源
+			-update,install
+		-准备进行部署
+			-导出项目所有的依赖
+				-pip freeze > requirements.txt
+			-安装项目所需依赖
+				-pip install -r requirements.txt
+			-修改配置文件到指定路径
+			-从静态文件开始部署
+			-动态资源
+				-处理好数据
+				-创建库，创建表
+				-插入数据
+		-坑点
+			-邮件发送
+				-25端口是非安全端口，阿里不允许使用
+					-使用安全SSL端口465
+
+-简单的压力测试
+	-ApacheBench
+	-ab -n 测试网址
+	
+-数据统计
+	-百度统计
+	-友盟统计
+	
+-restful
+	-软件架构风格，是一种思想
+	-用在客户端和服务端这种模型中
+	-实现前后端分离
+	-理解
+		-表现层状态转移
+		-表征性状态转换
+		-资源的表现形式发生了转换
+		-客户端要实现状态转换 通过请求谓词
+			-GET
+			-POST
+			-PUT
+			-DELETE
+			-PATCH
+	-API设计原则
+		-协议 http(s)
+		-专属域名或前缀
+		-可以包含版本
+		-在queryString中包含过滤信息
+		-路径通常是名词复数
+		-传输格式JSON
+		-尽量带有超链接
+		-认证使用Auth2.0
+	-简单实现
+		-针对一个接口的不同请求方式进行不同的处理
+	-前端
+		-web
+			-ajax
+		-移动端
+	
+
+视图函数
+	-FBV
+		-function base view 基于函数的视图函数
+	-CBV
+		-class base view 基于类的视图函数
+		-继承自view 
+			-class HelloCbv(View):
+		-注册的时候使用的as_view
+			- url(r'^books/',views.HelloCbv.as_view(),name='books')
+		-入口
+			-不能使用请求方法的名字作为参数的名字
+			-只能接受已经存在的属性对应的参数
+			-定义了一个view
+				-创建了一个类视图对象
+				-保留，拷贝传递进来的属性和参数
+				-调用dispatch方法
+					-分发
+					-根据请求方法的名字进行分发
+					-如果请求方法在我们允许的列表中
+						-从自己这个对象中获取请求方法名字小写对应的属性，如果没有找到，会给一个默认http_method_not_allowed
+					-如果请求方法不在我们允许的列表中
+						-直接http_method_not_allowed
+					-之后讲参数传递，调用函数
+			-默认实现了options
+				-获取接口信息，可以获取接口都允许什么请求
+		-TemplateView
+			-通过多继承实现
+			-template_name
+		-ListView
+			-渲染在模板上
+			-template_name
+			-数据
+				-model
+				-queryset
+		-DetailView
+			-渲染在模板上
+			-template_name
+			-数据
+				-model
+				-queryset
+			-单一实例
+				-pk
+				-slug
+		-简化版流程
+			-as_view
+			-dispath
+			-调用请求方法对应的函数名
+
+-负载均衡
+	-upstream模块
+	-只需将服务器记录在内部即可
+	-负载均衡算法
+		-权重
+		-down
+		-back
+		-iphash
+
+
+-Admin
+	-django内置后台管理
+	-User和Group
+	-自带权限
+	
+-重量级Django插件框架RESTful
+	-文档
+		-https://www.django-rest-framework.org/
+		-http://www.iamnancy.top/djangorestframework/Home/  中文
+	-django-rest-framework
+		-安装
+		-pip install djangorestframework
+	-REST难点
+		-模型序列化
+			-正向序列化
+				-将模型转换为JSON
+			-反向序列化
+				-将JSON转换为模型
+		-Serialization
+			-模块serializers
+				-HyperlinkedModelSerializer
+					-序列化模型，并添加超链接							
+				-serializer
+					-手动序列化
+		-双R
+			-Request
+				-rest_framework.request重新定义的一个类
+				-扩充django中的request
+				-将django中的request作为了自己的一个属性_request
+				-属性和方法
+					-content_type
+					-stream
+					-query_params
+					-data
+						-同时兼容POST,PUT,PATCH
+					-user
+						-可以直接在请求上获取用户
+						-相当于在请求上添加一个属性，用户对象
+					-auth
+						-认证
+						-相当于请求上添加了一个属性，属性值是token
+					-successful_authenticator
+						-认证成功																				
+			-Response
+				-依然是HttpResponse的子类
+				-自己封装的
+					-data直接接受字典转换为JSON
+					-status状态码
+				-属性和方法
+					-rendered_content
+						-渲染内容
+					-status_text
+						-状态码转为文字
+		-错误码
+			-封装status模块中
+			-实际上就是一个常量类
+		-针对视图函数的包装
+			-CBV
+				-APIView
+					-继承自View
+					-封装了一堆函数
+						-renderer_classes
+							-渲染的类
+						-parser_classes
+							-解析转换的类
+						-authentication_classes
+							-认证的类
+						-throttle_classes
+							-节流的类
+							-控制请求频率的类
+						-permission_classes
+							-权限的类
+						-content_negotiation_class
+							-内容过滤类
+						-metadata_class
+							-元信息的类
+						-versioning_class
+							-版本控制的类
+					-as_view()的重写
+						-调用父类中的as_view->dispatch
+							-dispatch被重写
+							-initialize_request
+								-使用django的request构建了一个REST中的Request
+							-initial 初始化工具
+								-perform_authentication
+									-执行用户认证
+									-遍历我们的认证器
+										-如果认证成功会返回一个元组
+										-元组中第一个元素是user
+										-元组中第二个元素是auth,token
+								-check_permissions
+									-检查权限
+									-遍历我们的权限检测器
+										-只要有一个权限检测没通过
+										-就直接显示权限被拒绝
+										-所有权限都满足，才算是拥有权限
+								-check_throttles
+									-检测频率
+									-遍历频率限制器
+										-如果验证不通过，就需要等待
+								-csrf_exempt
+									-所有APIView的子类都是csrf豁免的
+			-FBV
+				-添加@api_view装饰器
+				-必须手动指定允许的请求方法
+					-@api_view(['GET','POST'])
+-HelloREST
+	-序列化器
+		-模块serializers
+			-HyperlinkedModelSerializer
+			-指定序列化的模型和字段
+	-视图函数
+		-viewsets
+			-ModelViewSet
+			-视图函数集合
+			-直接集成了
+				-对象的创建
+				-对象的列表查询
+				-对象的单个查询
+				-对象的修改
+				-对象的删除
+	-路由
+		-routers.DefaultRouter
+		-将viewsets注册在此
+		-实际上生产了多个路由
+		-include到urlpatterns
+	-数据一下就实现了所有的操作 增删改查
+	-记得在install_app中添加rest_framework
+	-runserver
+		-所有Api变成可视化
+		-超链接
+			-HyperLinkedModelSerializer
+		-对数据集合实现了
+			-路由 /users/,/groups/
+			-get
+			-post
+		-对单个实现了
+			-路由 /users/id/,/groups/id/
+			-get
+			-post
+			-put
+			-delete
+			-patch
+		-viewsets做了视图函数的实现
+		-router做了路由的注册
+
+-序列化器
+	-serializers.Serializer  
+		-原生序列化
+		-需要手动编写每个序列化的字段
+		-手动实现 对象创建和更新
+	-serializers.ModelSerializer  
+		-模型序列化
+		-只需指定模型和字段就可以
+		-指定字段
+			-fields
+			-exclude
+	-serializers.HyperLinkedModelSerializer  
+		-带超链接的模型序列化
+		-只需指定模型和字段就可以
+		-继承自ModelSerializer
+		-在ModelSerializer的基础上字段扩充了url
+		
+
+-APIView子类
+	-GenericAPIView
+		-增加了模型的获取操作
+		-get_queryset
+			-获取查询结果集
+		-get_object
+			-获取单个对象
+			-lookup_field默认pk
+		-get_serializer
+			-序列化实例
+		-get_serializer_class
+			-获取序列化类
+		-get_serializer_context
+			-获取序列化上下文内容
+		-filter_queryset
+			-对queryset进行过滤
+		-paginator
+			-分页器
+		-paginate_queryset
+			-对结果集进行分类
+		-get_paginated_response
+			-获取分页后的结果响应
+	-CreateAPIView
+		-创建的类视图
+		-继承自GenericAPIView,mixins.CreateModelMixin
+		-实现了post进行创建
+	-ListAPIView
+		-列表的类视图
+		-继承自mixins.ListModelMixin,GenericAPIView
+		-实现了get
+	-RetrieveAPIView
+		-查询单个数据的类视图
+		-继承自mixins.RetrieveModelMixin,GenericAPIView
+		-实现了get		
+	-DestroyAPIView
+		-销毁数据的类视图，删除数据的类视图
+		-继承自mixins.DestroyModelMixin,GenericAPIView
+		-实现了delete
+	-UpdateAPIView
+		-更新数据的类视图
+		-继承自mixins.UpdateModelMixin,GenericAPIView
+		-实现了put,patch
+	-ListCreateAPIView
+		-获取列表数据，创建数据的类视图
+		-继承自mixins.ListModelMixin,mixins.CreateModelMixin,GenericAPIView
+		-实现了get,post
+	-RetrieveUpdateAPIView
+		-获取单个数据，更新单个数据的类视图
+		-继承自mixins.RetrieveModelMixin,mixins.UpdateModelMixin,GenericAPIView
+		-实现了get,put,patch
+	-RetrieveDestroyAPIView
+		-获取单个数据，删除单个数据的类视图
+		-继承自mixins.RetrieveModelMixin,mixins.DestroyModelMixin,GenericAPIView
+		-实现了get,delete
+	-RetrieveUpdateDestroyAPIView
+		-获取单个数据，更新单个数据，删除单个数据的类视图
+		-继承自mixins.RetrieveModelMixin,mixins.UpdateModelMixin,mixins.DestroyModelMixin,GenericAPIView
+		-实现了get,put,patch,delete
+-mixins
+	-CreateModelMixin
+		-create
+		-perform_create
+		-get_success_headers
+	-ListModelMixin
+		-list
+			-查询结果集，添加分页，帮你序列化
+	-RetrieveModelMixin
+		-retrieve
+			-获取单个对象并序列化
+	-DestroyModelMixin
+		-destory
+			-获取单个对象
+			-调用执行删除
+			-返回Respon 状态码204
+		-perform_destroy
+			-默认是模型的delete
+			-如果是数据的逻辑删除
+				-重写进行保存
+	-UpdateModelMixin
+		-update
+			-获取对象，合法验证
+			-执行更新
+		-perform_update
+			-全部更新保存，对应put
+		-partial_update
+			-部分更新，对应的就是patch
+
+-viewsets
+	-对APIView和Mixins高度封装
+	-可以对接router
+	-ViewSetMixin
+		-重写了as_view
+	-ViewSet
+		-继承自ViewSetMixin, views.APIView
+		-默认啥都不支持，需要自己手动实现
+	-GenericViewSet
+		-继承自ViewSetMixin, generics.GenericAPIView
+	-ReadOnlyModelViewSet
+		-只读的模型的视图集合
+		-实现了get
+		-继承自mixins.RetrieveModelMixin,mixins.ListModelMixin,GenericViewSet
+	-ModelViewSet
+		-直接封装对象的所有操作
+		-继承自mixins.CreateModelMixin,
+                   mixins.RetrieveModelMixin,
+                   mixins.UpdateModelMixin,
+                   mixins.DestroyModelMixin,
+                   mixins.ListModelMixin,
+                   GenericViewSet
+		
+-用户模块
+	-用户注册
+		-RESTful
+		-数据开始
+			-模型，数据库
+			-创建用户
+				-用户身份
+					-管理员
+					-普通
+					-删除用户
+		-注册实现
+			-添加了超级管理员
+	-用户登陆
+		-验证用户名密码
+		-生成用户令牌
+		-出现和注册共用post冲突
+			-添加action
+			-path/?action=login
+			-path/?action=register
+		-异常捕获尽量精确
+	-用户认证
+		-继承自系统的基类BaseAuthentication
+		-重写认证类 authenticate
+		-认证失败返回None
+		-认证成功返回一个元组
+			-第一个元素是User
+			-第二个元素是auth,token
+			-用户存储在request.user
+			-令牌存储在request.auth			
+	-用户权限
+		-继承自系统的权限基类 BasePermission
+		-重写has_permission
+			-返回TURE代表拥有权限
+			-false则无权限
+			-根据用户的状态动态返回true或false
+		
+
+-需求
+	-存在级联数据
+	-用户和收货地址
+	-节流
+-分析
+	-数据开始
+		-模型定义
+		-用户和地址 一对多
+			-用户表
+			-地址表
+				-foreignkey
+		-序列化
+			-级联数据如何实现序列化
+		节流
+
+
+-节流	
+	-包含的方法
+		-BaseThrottle
+			-allow_request
+				-是否允许的请求的核心
+			-get_ident
+				-获取客户端唯一标识
+			-wait
+				-等待
+		-SimpleRateThrottle
+			-get_cache_key
+				-获取缓存标识
+			-get_rate
+				-获取频率
+			-parse_rate
+				-转换频率
+					-num/duration
+					-duration
+						-s
+						-m
+						-h
+						-d
+		
+			-allow_request
+				-是否允许请求
+				-重写的方法
+			-throttle_success
+				-允许请求，进行请求记录
+			-throttle_failure
+				-不允许请求
+			-wait
+				-还有多少时间允许
+		-AnonRateThrottle
+			-get_cache_key
+				-获取缓存key的原则
+		-UserRateThrottle
+			-get_cache_key
+			-和AnonRateThrottle一样
+		-ScopedRateThrottle
+			-和上面一样
+			-多写了从属性中获取频率
+			-allow_request
+			-get_cache_key
+				
+	-HTTP_X_FORWARDED_FOR
+		-获取你的原始IP
+			-通过普通的代理发生的请求
+			-如果获取REMOTE_ADDR获取的是代理IP
+		-代理
+			-普通代理
+			-高匿代理
+				-效率越低，请求速度越慢
+
+
+-Celery
+	-消息队列
+		-异步任务
+		-定时任务
+	-需要了解的知识
+		-选择并安装消息容器（载体）
+			-redis
+			-安装Celery和这些依赖项
+				-pip install -U "celery[redis]"
+		-安装celery并创建第一个任务
+			-pip install celery
+		-celery参数配置
+			-CELERY_BROKER_URL = 'redis://localhost:6379/1'
+			CELERY_TASK_SERIALIZER = 'json'
+			CELERY_ACCEPT_CONTENT = ['json']
+			CELERY_RESULT_BACKEND = 'django-db'
+		-须安装django-celery-results 
+			-pip install django-celery-results
+		-开启工作进程并调用任务
+			开启进程
+				-celery -A tasks worker --loglevel=info  报错
+				-celery -A <mymodule> worker -l info -P eventlet
+				-启动redis
+					-D:\program files\Redis>redis-server.exe redis.windows.conf
+			-调用任务
+				-taskname.delay
+		-记录工作状态和返回结果
+			-result=task.delay()
+			-返回结果默认在 django_celery_results_taskresult表中
+				-如果提示Table 'djangosum.django_celery_results_taskresult' doesn't exist
+				-需要重新迁移下库
+		-异步发送邮件
+			-参数配置
+				-EMAIL_HOST = 'smtp.163.com'
+				EMAIL_PORT = 25
+				EMAIL_HOST_USER = '532720298@163.com'
+				EMAIL_HOST_PASSWORD = 'IXTOPIIYEJLQGNHS'
+				SERVER_HOST = '127.0.0.1'
+				SERVER_PORT = 8000
+		
+
+-django后台管理
+	-创建用户
+		-python manage.py createsuperuser
+	-内置模块
+		-用户
+		-组
+
+	
+-redis
+	-3大功能
+		-存储
+		-缓存
+		-消息队列
+
+-@property 将一个方法改成属性
+
+
+
+		
+		
+		
