@@ -37,7 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'App.apps.AppConfig',
+    'App',
     'django_celery_results',
     'rest_framework',
 ]
@@ -57,7 +57,8 @@ ROOT_URLCONF = 'DjangoSum.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'templates')]
+        'DIRS': [
+            os.path.join(BASE_DIR, 'templates')]
         ,
         'APP_DIRS': True,
         'OPTIONS': {
@@ -152,3 +153,5 @@ CELERY_BROKER_URL = 'redis://localhost:6379/1'
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_RESULT_BACKEND = 'django-db'
+
+MEDIA_ROOT=os.path.join(BASE_DIR,'static/uploads')

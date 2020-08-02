@@ -9,8 +9,8 @@ urlpatterns=[
         {
             'get':'list',
         }
-    ),name='customer-detail'),
-    url(r'^active/',views.active),
+    ),name="customer-detail"),
+    url(r'^active/',views.active),#用户访问激活链接激活用户
     url(r'^goods/',GoodsView.as_view()),
     # url(r'^cart/',views.cart),
     url(r'^carts/',views.CartView.as_view(

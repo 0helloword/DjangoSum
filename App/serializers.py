@@ -7,7 +7,7 @@ from App.models import Customer, Goods, Cart, Address
 class CustomerSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model=Customer
-        fields=('url','id','c_name','c_email','c_is_super')
+        fields=('id','c_name','c_email','c_is_super')
 
 class GoodsSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:

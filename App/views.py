@@ -3,6 +3,7 @@ import uuid
 from django.contrib.auth.hashers import make_password, check_password
 from django.core.cache import cache
 from django.http import JsonResponse, HttpResponse
+from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework import exceptions, status, viewsets
 from rest_framework.generics import CreateAPIView, ListAPIView, ListCreateAPIView
@@ -106,7 +107,7 @@ def active(request):
 #实现商品列表的展示和添加商品
 class GoodsView(ListCreateAPIView):
     #post方法实现添加商品,get方法实现获取商品列表
-    # 增加身份认证，未登陆（请求中无token）用户无法查看商品列表,无法添加商品
+    # 增加身份认证，未登陆（请求中无token）用户无法查看商品列表,非管理员用户无法添加商品
     serializer_class = GoodsSerializer
     queryset = Goods.objects.all()
     authentication_classes = (LoginAuthencation,)
